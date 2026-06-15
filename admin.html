@@ -536,7 +536,7 @@
     const specs      = [...$("acSpecs").querySelectorAll(".rrow")].map(r=>{const i=r.querySelectorAll("input");return{label:i[0].value.trim(),value:i[1].value.trim()};}).filter(s=>s.label||s.value);
     const features   = [...$("acFeats").querySelectorAll(".rrow")].map(r=>({icon:r.querySelector("select").value,title:r.querySelectorAll("input")[0].value.trim(),desc:r.querySelectorAll("input")[1].value.trim()})).filter(f=>f.title||f.desc);
 
-    for (const [lang, pair] of [["en","pt-en"],["es","pt-es"]]) {
+    for (const [lang, pair] of [["en","pt|en"],["es","pt|es"]]) {
       const [tCond, tLoc, tDesc] = await Promise.all([
         myMemoryTranslate(condition, pair),
         myMemoryTranslate(location, pair),
@@ -753,7 +753,7 @@
     const desc  = $("cfDesc").value.trim();
     const specs = [...$("cfSpecs").querySelectorAll(".rrow")].map(r=>{const i=r.querySelectorAll("input");return{k:i[0].value.trim(),v:i[1].value.trim()};}).filter(s=>s.k||s.v);
     cfTrData["pt"] = { label, desc, specs };
-    for (const [lang, pair] of [["en","pt-en"],["es","pt-es"]]) {
+    for (const [lang, pair] of [["en","pt|en"],["es","pt|es"]]) {
       const [tLabel, tDesc] = await Promise.all([myMemoryTranslate(label,pair), myMemoryTranslate(desc,pair)]);
       const tSpecs = await Promise.all(specs.map(async s=>({ k:await myMemoryTranslate(s.k,pair), v:s.v })));
       cfTrData[lang] = { label:tLabel, desc:tDesc, specs:tSpecs };
