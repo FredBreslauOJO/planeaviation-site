@@ -36,8 +36,8 @@
   <!-- HERO -->
   <section class="page-hero tall center">
     <div class="container">
-      <span class="eyebrow">Tecnologia &amp; Inovação</span>
-      <h1 class="h-display">Universo Cirrus</h1>
+      <span class="eyebrow" data-i18n="uc_eyebrow">Tecnologia &amp; Inovação</span>
+      <h1 class="h-display" data-i18n="uc_title">Universo Cirrus</h1>
       <p style="font-size:1rem;max-width:36rem">Conheça a filosofia de design, segurança e tecnologia da fabricante que reinventou a aviação geral.</p>
     </div>
   </section>
@@ -67,8 +67,8 @@
   <section class="uc-sec">
     <div class="container">
       <div class="uc-head">
-        <span class="eyebrow">Tecnologias exclusivas</span>
-        <h2>O que torna a Cirrus única</h2>
+        <span class="eyebrow" data-i18n="uc_tech_eyebrow">Tecnologias exclusivas</span>
+        <h2 data-i18n="uc_tech_title">O que torna a Cirrus única</h2>
       </div>
       <div class="grid g1 sm-g2 lg-g3" id="techGrid" style="gap:1.25rem"></div>
     </div>
@@ -78,8 +78,8 @@
   <section class="uc-sec" style="background:hsl(var(--muted))">
     <div class="container">
       <div class="uc-head">
-        <span class="eyebrow">Linha de modelos</span>
-        <h2>Cada aeronave, uma história</h2>
+        <span class="eyebrow" data-i18n="uc_models_eyebrow">Linha de modelos</span>
+        <h2 data-i18n="uc_models_title">Cada aeronave, uma história</h2>
       </div>
       <div class="grid g1 md-g2" id="modelGrid" style="gap:1.5rem"></div>
     </div>
@@ -102,6 +102,7 @@
 
 <style>@media(min-width:640px){ .cta-row{ flex-direction:row!important; } }</style>
 
+<script src="i18n.js"></script>
 <script src="site.js"></script>
 <script src="firebase-config.js"></script>
 <script>
@@ -130,18 +131,28 @@
     { name:"SR22", label:"O Mais Vendido do Mundo", desc:"Mais de duas décadas consecutivas como o monomotor mais vendido do planeta. Equilíbrio perfeito entre performance, conforto e custo operacional.", specs:[["Velocidade Máx.","183 ktas"],["Alcance","1.049 nm"],["Altitude Máx.","17.500 ft"],["Motor","Continental IO-550-N"]] },
     { name:"SR20", label:"Iniciação e Treinamento", desc:"A porta de entrada perfeita na família Cirrus. Todos os sistemas de segurança CAPS com motor mais eficiente, ideal para formação e missões de curta distância.", specs:[["Velocidade Máx.","160 ktas"],["Alcance","990 nm"],["Altitude Máx.","17.500 ft"],["Motor","Continental IO-390"]] }
   ];
+  function t(k){ return window.PA_I18N ? PA_I18N.t(k) : k; }
+  function getLang(){ return window.PA_I18N ? PA_I18N.getLang() : "pt"; }
+
+  let rawModels = []; // stores full Firestore docs for re-render
+
   function renderModels(models){
+    const lang = getLang();
     document.getElementById("modelGrid").innerHTML = models.map(m => {
+      // Pick localized fields
+      const label = (lang!=="pt" && m.translations?.[lang]?.label) || m.label || "";
+      const desc  = (lang!=="pt" && m.translations?.[lang]?.desc)  || m.desc  || "";
+      const specs = (lang!=="pt" && m.translations?.[lang]?.specs)  || m.specs || [];
       const media = m.image
         ? `<img src="${m.image}" alt="${m.name}" style="width:100%;aspect-ratio:16/8;object-fit:cover;display:block">`
-        : `<div class="ph" style="aspect-ratio:16/8"><svg class="icon ico" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg><span class="lbl">[Imagem ${m.name}]</span></div>`;
+        : `<div class="ph" style="aspect-ratio:16/8"><svg class="icon ico" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg><span class="lbl">[${m.name}]</span></div>`;
       return `<div class="model-card">
         ${media}
         <div class="body">
-          <span class="eyebrow" style="letter-spacing:.2em">${m.label||""}</span>
+          <span class="eyebrow" style="letter-spacing:.2em">${label}</span>
           <h3>${m.name}</h3>
-          <p class="desc">${m.desc||""}</p>
-          <div class="model-specs">${(m.specs||[]).map(s=>`<div><div class="k">${s[0]}</div><div class="v">${s[1]}</div></div>`).join("")}</div>
+          <p class="desc">${desc}</p>
+          <div class="model-specs">${specs.map(s=>`<div><div class="k">${s[0]||s.k||""}</div><div class="v">${s[1]||s.v||""}</div></div>`).join("")}</div>
         </div>
       </div>`;
     }).join("");
@@ -152,14 +163,17 @@
       try {
         const snap = await PA.db.collection("cirrusFleet").orderBy("order","asc").get();
         if (!snap.empty) {
-          renderModels(snap.docs.map(d=>{ const c=d.data(); return { name:c.name, label:c.label, desc:c.desc, image:c.image||"", specs:(c.specs||[]).map(s=>[s.k,s.v]) }; }));
+          rawModels = snap.docs.map(d=>{ const c=d.data(); return { name:c.name, label:c.label, desc:c.desc, image:c.image||"", specs:(c.specs||[]), translations:c.translations||{} }; });
+          renderModels(rawModels);
           return;
         }
-      } catch(e){ /* fallback */ }
+      } catch(e){ /* fallback seed */ }
     }
+    rawModels = seedModels;
     renderModels(seedModels);
   }
   initModels();
+  document.addEventListener("pa:langchange", () => { renderModels(rawModels.length ? rawModels : seedModels); });
 </script>
 </body>
 </html>

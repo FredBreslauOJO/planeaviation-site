@@ -87,11 +87,11 @@
     </div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
-      <div class="hero-badge"><span class="eyebrow">Representante exclusiva Cirrus no Brasil</span></div>
-      <h1>O acesso definitivo à aviação executiva de alta performance.</h1>
+      <div class="hero-badge"><span class="eyebrow">data-i18n="home_badge">Representante exclusiva Cirrus no Brasil</span></div>
+      <h1 data-i18n="home_hero">O acesso definitivo à aviação executiva de alta performance.</h1>
       <div class="hero-cta">
-        <a href="aeronaves.html" class="btn btn-solid btn-md">Ver Aeronaves Disponíveis</a>
-        <a href="contato.html" class="btn btn-outline btn-md">Falar com um Especialista</a>
+        <a href="aeronaves.html" class="btn btn-solid btn-md" data-i18n="home_cta1">Ver Aeronaves Disponíveis</a>
+        <a href="contato.html" class="btn btn-outline btn-md" data-i18n="home_cta2">Falar com um Especialista</a>
       </div>
     </div>
   </section>
@@ -101,10 +101,10 @@
     <div class="container">
       <div class="inv-head">
         <div>
-          <span class="eyebrow">Estoque disponível</span>
-          <h2>Oportunidades em Destaque</h2>
+          <span class="eyebrow" data-i18n="home_inv_eyebrow">Estoque disponível</span>
+          <h2 data-i18n="home_inv_title">Oportunidades em Destaque</h2>
         </div>
-        <a href="aeronaves.html" class="arrow-link">Ver todo estoque <svg class="icon i-35" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+        <a href="aeronaves.html" class="arrow-link" data-i18n="home_inv_all">Ver todo estoque <svg class="icon i-35" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
       </div>
       <div class="grid g1 sm-g2 lg-g4" id="invGrid" style="gap:1.25rem"></div>
     </div>
@@ -114,8 +114,8 @@
   <section class="vid-sec">
     <div class="container vid-wrap">
       <div class="center" style="margin-bottom:2rem">
-        <span class="eyebrow">Plane Aviation</span>
-        <h2 style="font-size:1.5rem;font-weight:700;letter-spacing:-.025em;margin-top:.5rem">Conheça a nossa história</h2>
+        <span class="eyebrow" data-i18n="home_vid_eyebrow">Plane Aviation</span>
+        <h2 style="font-size:1.5rem;font-weight:700;letter-spacing:-.025em;margin-top:.5rem" data-i18n="home_vid_title">Conheça a nossa história</h2>
       </div>
       <div class="vid-box">
         <div class="vid-inner">
@@ -132,8 +132,8 @@
   <section class="sec" style="background:hsl(var(--muted))">
     <div class="container">
       <div class="sec-head">
-        <span class="eyebrow">Fabricante</span>
-        <h2>Conheça a Linha Cirrus</h2>
+        <span class="eyebrow" data-i18n="home_cirrus_eyebrow">Fabricante</span>
+        <h2 data-i18n="home_cirrus_title">Conheça a Linha Cirrus</h2>
         <p class="muted" style="font-size:.875rem;margin-top:.75rem;max-width:28rem;margin-left:auto;margin-right:auto">Tecnologia de ponta, design premiado e o único paraquedas balístico integrado da aviação geral.</p>
       </div>
       <div class="grid g1 md-g2" style="gap:1.5rem">
@@ -170,8 +170,8 @@
   <section class="sec">
     <div class="container">
       <div class="sec-head">
-        <span class="eyebrow">Operação completa</span>
-        <h2>Muito além da venda.</h2>
+        <span class="eyebrow" data-i18n="home_svc_eyebrow">Operação completa</span>
+        <h2 data-i18n="home_svc_title">Muito além da venda.</h2>
         <p class="muted" style="font-size:1rem;margin-top:.5rem">Uma operação completa.</p>
       </div>
       <div class="grid g1 sm-g3" style="gap:1.25rem">
@@ -202,8 +202,8 @@
     <div class="container">
       <div class="row">
         <div class="col">
-          <span class="eyebrow dark">Para proprietários</span>
-          <h2>Venda seu Cirrus com quem entende do mercado.</h2>
+          <span class="eyebrow dark" data-i18n="home_sell_eyebrow">Para proprietários</span>
+          <h2 data-i18n="home_sell_title">Venda seu Cirrus com quem entende do mercado.</h2>
           <p>Conectamos sua aeronave a uma rede exclusiva de compradores qualificados. Avaliação profissional, marketing especializado e processo seguro do início ao fim.</p>
         </div>
         <a href="contato.html?motivo=vender" class="btn btn-invert btn-md" style="font-weight:700">Quero anunciar meu avião <svg class="icon i-4" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
@@ -216,8 +216,8 @@
     <div class="container">
       <div class="row">
         <div>
-          <span class="eyebrow dark">Conteúdo</span>
-          <h2>Plane Insights</h2>
+          <span class="eyebrow dark" data-i18n="home_news_eyebrow">Conteúdo</span>
+          <h2 data-i18n="home_news_title">Plane Insights</h2>
           <p>Acompanhe nossa visão de mercado, análises de especialistas e episódios exclusivos do nosso podcast sobre o universo da aviação executiva.</p>
         </div>
         <a href="news.html" class="btn btn-invert btn-wide">Acessar News &amp; Podcast →</a>
@@ -228,6 +228,7 @@
 </main>
 <div id="site-footer"></div>
 
+<script src="i18n.js"></script>
 <script src="site.js"></script>
 <script src="firebase-config.js"></script>
 <script>
