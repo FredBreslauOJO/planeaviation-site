@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detalhe da Aeronave | Plane Aviation</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+  .crumb{ border-bottom:1px solid hsl(var(--border)); }
+  .crumb .container{ padding-top:.75rem; padding-bottom:.75rem; display:flex; align-items:center; gap:.5rem; font-size:.75rem; color:hsl(var(--muted-foreground)); }
+  .crumb a:hover{ color:hsl(var(--foreground)); }
+  .crumb .cur{ color:hsl(var(--foreground)); font-weight:500; }
+
+  .det-wrap{ padding-bottom:6rem; }
+  .det-top{ padding:2.5rem 0; }
+  .det-grid{ display:grid; grid-template-columns:1fr; gap:2.5rem; }
+  @media(min-width:1024px){ .det-grid{ grid-template-columns:repeat(2,1fr); } }
+
+  .gal-main{ position:relative; }
+  .gal-nav{ position:absolute; top:50%; transform:translateY(-50%); width:2rem; height:2rem; background:hsl(var(--card)); border:1px solid hsl(var(--border)); border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s; }
+  .gal-nav:hover{ background:hsl(var(--muted)); }
+  .gal-nav.prev{ left:.75rem; } .gal-nav.next{ right:.75rem; }
+  .thumbs{ display:grid; grid-template-columns:repeat(4,1fr); gap:.5rem; margin-top:.75rem; }
+  .thumbs button{ background:none; border:none; padding:0; cursor:pointer; }
+  .thumbs .ph{ border:2px solid transparent; }
+  .thumbs .ph.active{ border-color:hsl(var(--foreground)); }
+
+  .det-info h1{ font-size:1.875rem; font-weight:700; letter-spacing:-.025em; margin-top:.25rem; margin-bottom:.5rem; }
+  @media(min-width:640px){ .det-info h1{ font-size:2.25rem; } }
+  .det-meta{ display:flex; align-items:center; gap:.75rem; font-size:.875rem; color:hsl(var(--muted-foreground)); margin-bottom:1.5rem; }
+  .det-meta .div{ width:1px; height:1rem; background:hsl(var(--border)); }
+  .det-actions{ display:flex; gap:.75rem; margin-bottom:2rem; }
+  .det-actions .btn{ flex:1; padding:.75rem 1rem; font-size:.75rem; }
+  .specs{ border:1px solid hsl(var(--border)); border-radius:var(--radius-sm); overflow:hidden; }
+  .specs .r{ display:flex; justify-content:space-between; align-items:center; padding:.75rem 1rem; font-size:.875rem; border-bottom:1px solid hsl(var(--border)); }
+  .specs .r:last-child{ border-bottom:none; }
+  .specs .r .v{ font-weight:600; }
+
+  .feats{ margin-top:3.5rem; }
+  .feat{ border:1px solid hsl(var(--border)); border-radius:var(--radius-sm); padding:1.25rem; }
+  .feat svg{ color:hsl(var(--foreground)/.6); margin-bottom:.75rem; }
+  .feat h3{ font-size:.875rem; font-weight:700; margin-bottom:.25rem; }
+  .feat p{ font-size:.75rem; color:hsl(var(--muted-foreground)); }
+
+  .sticky-bar{ position:fixed; bottom:0; left:0; right:0; background:hsl(var(--card)); border-top:1px solid hsl(var(--border)); z-index:40; box-shadow:0 -4px 12px rgba(0,0,0,.06); }
+  .sticky-bar .container{ padding-top:.875rem; padding-bottom:.875rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+  .sticky-bar .price{ font-size:.875rem; color:hsl(var(--muted-foreground)); margin-left:.75rem; }
+</style>
+</head>
+<body>
+<div id="site-header"></div>
+<main>
+  <div class="crumb">
+    <div class="container">
+      <a href="aeronaves.html">Aeronaves Disponíveis</a>
+      <span>/</span>
+      <span class="cur" id="crumbModel"></span>
+    </div>
+  </div>
+
+  <div class="det-wrap">
+    <div class="container det-top">
+      <div class="det-grid">
+        <!-- Galeria -->
+        <div>
+          <div class="gal-main">
+            <div class="ph rounded" id="galMain" style="aspect-ratio:4/3"></div>
+            <div class="gal-nav prev" id="galPrev"><svg class="icon i-4" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></div>
+            <div class="gal-nav next" id="galNext"><svg class="icon i-4" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
+            <span class="tag" id="galTag"></span>
+          </div>
+          <div class="thumbs" id="thumbs"></div>
+        </div>
+
+        <!-- Info -->
+        <div class="det-info">
+          <span class="eyebrow" id="condLoc" style="letter-spacing:.2em"></span>
+          <h1 id="model"></h1>
+          <div class="det-meta"><span id="year"></span><span class="div"></span><span id="hours"></span></div>
+          <div class="det-actions">
+            <a href="contato.html?motivo=comprar" class="btn btn-solid">Solicitar Proposta</a>
+            <a href="contato.html?motivo=visita" class="btn btn-outline">Agendar Visita / Call</a>
+          </div>
+
+          <!-- Descrição livre (só aparece se preenchida) -->
+          <div id="descBlock" style="display:none;margin-bottom:1.5rem">
+            <h2 id="descLabel" class="label" style="margin-bottom:.75rem" data-i18n="det_about">Sobre esta aeronave</h2>
+            <p id="descText" style="font-size:.875rem;color:hsl(var(--muted-foreground));line-height:1.8;white-space:pre-wrap"></p>
+          </div>
+
+          <h2 id="specsLabel" class="label" style="margin-bottom:.75rem">Ficha Técnica</h2>
+          <div class="specs" id="specs"></div>
+        </div>
+      </div>
+
+      <!-- Tecnologias -->
+      <div class="feats">
+        <h2 id="featsLabel" class="label" style="margin-bottom:1.5rem">Tecnologias a bordo</h2>
+        <div class="grid g1 sm-g2 lg-g4" id="feats" style="gap:1rem"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Barra fixa -->
+<div class="sticky-bar">
+  <div class="container">
+    <div><span style="font-size:.875rem;font-weight:700" id="barTitle"></span><span class="price" id="barPrice"></span></div>
+    <a href="contato.html?motivo=comprar" class="btn btn-solid btn-sm">Solicitar Proposta</a>
+  </div>
+</div>
+
+<div id="site-footer"></div>
+
+<script src="i18n.js"></script>
+<script src="site.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+  const ICONS = {
+    Shield:'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+    Monitor:'<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>',
+    Navigation:'<polygon points="3 11 22 2 13 21 11 13 3 11"/>',
+    Gauge:'<path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>',
+    Zap:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+    Wind:'<path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/>',
+    Award:'<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>'
+  };
+  function t(k){ return window.PA_I18N ? PA_I18N.t(k) : k; }
+  function getLang(){ return window.PA_I18N ? PA_I18N.getLang() : "pt"; }
+
+  function getLocalized(p, field){
+    const lang = getLang();
+    if (lang === "pt") return p[field] || "";
+    return (p.translations && p.translations[lang] && p.translations[lang][field]) || p[field] || "";
+  }
+  function getLocalizedArray(p, field){
+    const lang = getLang();
+    if (lang === "pt") return p[field] || [];
+    return (p.translations && p.translations[lang] && p.translations[lang][field]) || p[field] || [];
+  }
+  const id = new URLSearchParams(location.search).get("id");
+  let activeImg = 0, galleryCount = 4, P = null;
+
+  document.addEventListener("pa:langchange", () => { if(P) render(P); });
+
+  const galMain = document.getElementById("galMain");
+  const thumbs = document.getElementById("thumbs");
+
+  function hasImgs(){ return P.images && P.images.length; }
+  function paintMain(){
+    if (hasImgs()) galMain.innerHTML = `<img src="${P.images[activeImg]}" alt="${P.model}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block">`;
+    else galMain.innerHTML = `${XICO}<span class="lbl">[Foto ${activeImg+1} — ${P.model}]</span>`;
+  }
+  function paintThumbs(){
+    thumbs.innerHTML = Array.from({length:galleryCount}).map((_,i)=>{
+      const inner = hasImgs()
+        ? `<img src="${P.images[i]}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;border:2px solid ${i===activeImg?'hsl(var(--foreground))':'transparent'}">`
+        : `<div class="ph rounded ${i===activeImg?'active':''}" style="aspect-ratio:4/3"><svg class="icon ico" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg><span class="lbl">[${i+1}]</span></div>`;
+      return `<button data-i="${i}">${inner}</button>`;
+    }).join("");
+    thumbs.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ activeImg=+b.dataset.i; paintMain(); paintThumbs(); }));
+  }
+  document.getElementById("galPrev").addEventListener("click",()=>{ activeImg=(activeImg-1+galleryCount)%galleryCount; paintMain(); paintThumbs(); });
+  document.getElementById("galNext").addEventListener("click",()=>{ activeImg=(activeImg+1)%galleryCount; paintMain(); paintThumbs(); });
+
+  function render(p){
+    P = p;
+    galleryCount = hasImgs() ? p.images.length : 4;
+    // Don't reset activeImg when re-rendering for lang change
+    if (!P._rendered) { activeImg = 0; P._rendered = true; }
+
+    const loc_condition   = getLocalized(p, "condition");
+    const loc_location    = getLocalized(p, "location");
+    const loc_description = getLocalized(p, "description");
+    const loc_specs       = getLocalizedArray(p, "specs");
+    const loc_features    = getLocalizedArray(p, "features");
+
+    document.getElementById("crumbModel").textContent = `${p.model} — ${p.year}`;
+    document.getElementById("condLoc").textContent = `${loc_condition}${loc_location?" · "+loc_location:""}`;
+    document.getElementById("model").textContent = p.model;
+    document.getElementById("year").textContent = p.year;
+    document.getElementById("barTitle").textContent = `${p.model} · ${p.year}`;
+
+    // Horas
+    const hoursVal = p.hoursNum != null ? p.hoursNum : (p.hours ? String(p.hours).replace(/\D/g,"") : "");
+    document.getElementById("hours").textContent = hoursVal ? `${Number(hoursVal).toLocaleString("pt-BR")} ${t("det_hours")}` : "";
+    const metaDiv = document.querySelector(".det-meta .div");
+    if (metaDiv) metaDiv.style.display = hoursVal ? "" : "none";
+
+    // Preço
+    const currency = p.currency || "USD";
+    const priceNum = p.priceNum != null ? p.priceNum : (p.price && !isNaN(Number(p.price)) ? Number(p.price) : null);
+    let priceDisplay = t("ac_consult");
+    if (priceNum) {
+      priceDisplay = currency === "USD"
+        ? "USD " + Number(priceNum).toLocaleString("en-US")
+        : "R$ " + Number(priceNum).toLocaleString("pt-BR");
+    }
+    document.getElementById("barPrice").textContent = priceDisplay;
+
+    const galTag = document.getElementById("galTag");
+    galTag.className = "tag solid"; galTag.textContent = p.tag || "";
+    if (!p.tag) galTag.style.display = "none"; else galTag.style.display = "";
+
+    // Descrição (localizada)
+    const descBlock = document.getElementById("descBlock");
+    const descText  = document.getElementById("descText");
+    const descLabel = document.getElementById("descLabel");
+    if (loc_description) {
+      descText.textContent = loc_description;
+      descBlock.style.display = "block";
+      if (descLabel) descLabel.textContent = t("det_about");
+    } else { descBlock.style.display = "none"; }
+
+    // Ficha técnica (localizada)
+    const specsEl    = document.getElementById("specs");
+    const specsLabel = document.getElementById("specsLabel");
+    const specsHTML  = loc_specs.filter(s=>s[0]||s[1]).map(s =>
+      `<div class="r"><span class="muted">${s[0]}</span><span class="v">${s[1]}</span></div>`).join("");
+    if (specsHTML) { specsEl.innerHTML = specsHTML; specsLabel.style.display = ""; specsLabel.textContent = t("det_specs"); }
+    else { specsEl.innerHTML = ""; specsLabel.style.display = "none"; }
+
+    // Tecnologias (localizadas)
+    const featsEl    = document.getElementById("feats");
+    const featsLabel = document.getElementById("featsLabel");
+    const featsHTML  = loc_features.filter(f=>f[1]||f[2]).map(f =>
+      `<div class="feat"><svg class="icon i-5" viewBox="0 0 24 24">${ICONS[f[0]]||ICONS.Shield}</svg><h3>${f[1]}</h3><p>${f[2]}</p></div>`).join("");
+    if (featsHTML) { featsEl.innerHTML = featsHTML; featsLabel.style.display = ""; featsLabel.textContent = t("det_tech"); }
+    else { featsEl.innerHTML = ""; featsLabel.style.display = "none"; }
+
+    paintMain(); paintThumbs();
+  }
+
+  // Normaliza doc do Firestore (specs/features como objetos) para o formato de render
+  function fromFirestore(a){
+    return {
+      tag:a.tag||"", tagSolid:true, model:a.model||"", year:a.year||"",
+      hoursNum:a.hoursNum!=null?a.hoursNum:null, hours:a.hours||"",
+      condition:a.condition||"", currency:a.currency||"USD",
+      priceNum:a.priceNum!=null?a.priceNum:null, price:a.price||"",
+      location:a.location||"", description:a.description||"",
+      translations:a.translations||{},
+      images:a.images||[],
+      specs:(a.specs||[]).map(s=>[s.label,s.value]),
+      features:(a.features||[]).map(f=>[f.icon,f.title,f.desc])
+    };
+  }
+
+  function notFound(){
+    document.querySelector(".det-wrap").innerHTML = `
+      <div class="container" style="padding:4rem 0;text-align:center">
+        <span class="eyebrow">Estoque</span>
+        <h1 class="h-display" style="margin-top:.5rem">Aeronave não encontrada</h1>
+        <p class="muted" style="font-size:.875rem;margin-top:.75rem;max-width:28rem;margin-left:auto;margin-right:auto">Este anúncio não existe mais ou foi removido. Veja as demais aeronaves disponíveis.</p>
+        <a href="aeronaves.html" class="btn btn-solid btn-md" style="margin-top:1.5rem;display:inline-flex">Ver Aeronaves Disponíveis</a>
+      </div>`;
+    document.querySelector(".sticky-bar").style.display = "none";
+    document.querySelector(".crumb").style.display = "none";
+  }
+
+  async function init(){
+    if (window.PA && PA.configured && id) {
+      try {
+        const doc = await PA.db.collection("aircraft").doc(id).get();
+        if (doc.exists) { render(fromFirestore(doc.data())); return; }
+      } catch(e){ /* cai em não encontrada */ }
+    }
+    notFound();
+  }
+  init();
+</script>
+</body>
+</html>
