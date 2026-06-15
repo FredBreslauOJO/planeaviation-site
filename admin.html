@@ -204,8 +204,13 @@
         <div class="fld"><label>Ano *</label><input id="acYear" type="number" placeholder="2022"></div>
       </div>
       <div class="grid2">
-        <div class="fld"><label>Horas totais</label><input id="acHours" type="number" min="0" placeholder="320"></div>
+        <div class="fld"><label>Horas totais (célula)</label><input id="acHours" type="number" min="0" placeholder="320"></div>
         <div class="fld"><label>Condição</label><select id="acCondition"><option>Novo</option><option>Seminovo</option></select></div>
+      </div>
+      <!-- Métricas da aeronave — só o que preencher aparece no site -->
+      <div class="grid2">
+        <div class="fld"><label>Motor (horas)</label><input id="acMotor" type="number" min="0" placeholder="280"></div>
+        <div class="fld"><label>Hélice (horas)</label><input id="acHelice" type="number" min="0" placeholder="280"></div>
       </div>
       <div class="grid2">
         <div class="fld"><label>Localização</label><input id="acLocation" placeholder="Jundiaí — SP"></div>
@@ -659,6 +664,8 @@
     $("acId").value = id || "";
     $("acModel").value=a.model||""; $("acYear").value=a.year||"";
     $("acHours").value=a.hoursNum!=null?a.hoursNum:(a.hours?String(a.hours).replace(/\D/g,""):"");
+    $("acMotor").value=a.motorHours!=null?a.motorHours:"";
+    $("acHelice").value=a.heliceHours!=null?a.heliceHours:"";
     $("acCondition").value=a.condition||"Seminovo";
     $("acLocation").value=a.location||"";
     $("acCurrency").value=a.currency||"USD";
@@ -679,11 +686,14 @@
     if(!model) return alert("Informe o modelo.");
     const specs=[...$("acSpecs").querySelectorAll(".rrow")].map(r=>{const i=r.querySelectorAll("input");return {label:i[0].value.trim(),value:i[1].value.trim()};}).filter(s=>s.label||s.value);
     const features=[...$("acFeats").querySelectorAll(".rrow")].map(r=>({icon:r.querySelector("select").value,title:r.querySelectorAll("input")[0].value.trim(),desc:r.querySelectorAll("input")[1].value.trim()})).filter(f=>f.title||f.desc);
-    const hoursNum = $("acHours").value ? Number($("acHours").value) : null;
-    const priceNum = $("acPrice").value ? Number($("acPrice").value) : null;
-    const currency = $("acCurrency").value || "USD";
+    const hoursNum   = $("acHours").value  ? Number($("acHours").value)  : null;
+    const motorHours = $("acMotor").value  ? Number($("acMotor").value)  : null;
+    const heliceHours= $("acHelice").value ? Number($("acHelice").value) : null;
+    const priceNum   = $("acPrice").value  ? Number($("acPrice").value)  : null;
+    const currency   = $("acCurrency").value || "USD";
     const data={ model, year:Number($("acYear").value)||null,
       hoursNum, hours: hoursNum!=null ? hoursNum : null,
+      motorHours, heliceHours,
       condition:$("acCondition").value,
       location:$("acLocation").value.trim(),
       currency, priceNum, price: priceNum!=null ? priceNum : null,

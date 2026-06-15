@@ -87,8 +87,15 @@
     det_cta1:     { pt:"Solicitar Proposta",    en:"Request a Quote",      es:"Solicitar Propuesta" },
     det_cta2:     { pt:"Agendar Visita / Call", en:"Schedule a Visit / Call", es:"Agendar Visita / Llamada" },
     det_notfound: { pt:"Aeronave não encontrada", en:"Aircraft not found", es:"Aeronave no encontrada" },
+    det_notfound_p:{ pt:"Este anúncio não existe mais ou foi removido.", en:"This listing no longer exists or has been removed.", es:"Este anuncio ya no existe o fue eliminado." },
     det_back:     { pt:"Ver Aeronaves Disponíveis", en:"View Available Aircraft", es:"Ver Aeronaves Disponibles" },
     det_hours:    { pt:"horas",                 en:"hours",               es:"horas" },
+    det_other:    { pt:"Outras opções disponíveis", en:"Other available options", es:"Otras opciones disponibles" },
+    det_other_all:{ pt:"Ver todas",             en:"View all",            es:"Ver todas" },
+    det_meta_year:   { pt:"Ano",    en:"Year",     es:"Año" },
+    det_meta_cell:   { pt:"Célula", en:"Airframe",  es:"Célula" },
+    det_meta_engine: { pt:"Motor",  en:"Engine",   es:"Motor" },
+    det_meta_prop:   { pt:"Hélice", en:"Propeller", es:"Hélice" },
 
     /* UNIVERSO CIRRUS */
     uc_eyebrow:      { pt:"Tecnologia & Inovação", en:"Technology & Innovation", es:"Tecnología e Innovación" },
